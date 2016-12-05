@@ -1,9 +1,13 @@
 var express = require('express');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
-var Message = require('./models/message');
 var bodyParser = require('body-parser');
+var passport = require('passport');
+
+var Message = require('./models/message');
 var msgController = require('./controllers/message');
+var userController = require('./controllers/user');
+var Auth = require('./controllers/auth');
 
 var app = express();
 
@@ -13,6 +17,8 @@ mongoose.connect('mongodb://localhost:27017/NoteApp');
 var router = express.Router();
 
 app.use(bodyParser.json());
+app.use(passport.initialize());
+
 //use /api as main route.. for now
 app.use('/api',router);
 
@@ -22,14 +28,21 @@ router.get('/',function(req,res,next) {
 
 });
 
+//users route
+router.route('/users')
+.post(userController.addUser)
+.get(Auth.authenticate,userController.AllUsers);
+
+
+//msgs route
 router.route('/msg')
-.post(msgController.newMessage)
-.get(msgController.AllMessages);
+.post(Auth.authenticate,msgController.newMessage)
+.get(Auth.authenticate,msgController.AllMessages);
 
 router.route('/msg/:msg_id')
-.get(msgController.displayMessage)
-.put(msgController.updateMessage)
-.delete(msgController.deleteMessage);
+.get(Auth.authenticate,msgController.displayMessage)
+.put(Auth.authenticate,msgController.updateMessage)
+.delete(Auth.authenticate,msgController.deleteMessage);
 
 
 //start server on port 3000

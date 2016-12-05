@@ -8,7 +8,7 @@ module.exports.addUser = function(req,res){
 
 	user.save(function(err,info){
 		if(err)
-			res.json({head:"post users",error:"could not add user",message:""});
+			res.json({head:"post users",error:"could not add user",message:err.errmsg});
 		else
 			res.json({head:"post users",error:"None",message:"user stored :",info:info});
 	});
@@ -17,7 +17,7 @@ module.exports.addUser = function(req,res){
 module.exports.AllUsers = function(req,res){
 	User.find(function(err,users){
 		if(err)
-			res.json({head:"get users",error:"could not get user",message:""});
+			res.json({head:"get users",error:"could not get user",message:err.errmsg});
 		else
 			res.json({head:"get users",error:"None",message:"users retrieved :",info:users});
 	});	

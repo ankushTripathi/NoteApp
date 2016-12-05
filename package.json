@@ -6,7 +6,10 @@
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "mongodb": "*",
-    "mongoose": "^4.7.1"
+    "mongoose": "^4.7.1",
+    "passport": "^0.3.2",
+    "passport-http": "^0.3.0",
+    "passport-local": "^1.0.0"
   },
   "description": "simple RESTful api  in Node js using express ,mongo and passport",
   "version": "1.0.0",

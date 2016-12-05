@@ -6,7 +6,8 @@ var messageSchema = new mongoose.Schema({
 	from:String,
 	datetime:String,
 	subject:String,
-	content:String
+	content:String,
+	userId:String,
 
 });
 
