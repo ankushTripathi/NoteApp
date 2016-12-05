@@ -36,12 +36,11 @@ router.route('/users')
 
 //msgs route
 router.route('/msg')
-.post(Auth.authenticate,msgController.newMessage)
+.post(Auth.authenticate,msgController.sendMessage)
 .get(Auth.authenticate,msgController.AllMessages);
 
 router.route('/msg/:msg_id')
 .get(Auth.authenticate,msgController.displayMessage)
-.put(Auth.authenticate,msgController.updateMessage)
 .delete(Auth.authenticate,msgController.deleteMessage);
 
 

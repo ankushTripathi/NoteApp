@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 
+var msgInfo = new mongoose.Schema({msgId:String});
+
 var userSchema = new mongoose.Schema({
 	username:{
 		type:String,
@@ -10,7 +12,9 @@ var userSchema = new mongoose.Schema({
 	password:{
 		type:String,
 		required:true
-	}
+	},
+	sentMessages: [msgInfo],
+	recievedMessages: [msgInfo]
 });
 
 userSchema.pre('save',function(callback){

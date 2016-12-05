@@ -23,13 +23,12 @@ function validate(req,res,callback){
 
 			object.subject = req.body.subject;
 			object.content = req.body.content;
-			
 			callback(null,object);
 		});
 	});
 }
 
-module.exports.newMessage = function(req,res) {
+module.exports.sendMessage = function(req,res) {
 	try{
 
 		validate(req,res,function(err,msg){
@@ -41,13 +40,24 @@ module.exports.newMessage = function(req,res) {
 				datetime : msg.datetime,
 				subject : msg.subject,
 				content : msg.content,
-				userId : msg.userId
+				userId : msg.userId,
 			});
-			message.save(function(err,info){
+			message.save(function(err,msg){
 				if(err)
 					throw err
-				else
-					res.json({head:"post messages",error:"None",message:"message stored :",info:info});
+				else{
+					msgId = {"msgId":message._id};
+					User.findOneAndUpdate({username:message.from},{$push:{sentMessages:msgId}},function(err,info){
+						if(err)
+							throw "could not update from user";
+						User.findOneAndUpdate({username:message.to},{$push:{recievedMessages:msgId}},function(err,info){
+							if(err)
+								throw "could not update to user";
+							res.json({head:"post messages",error:"None",messages:"Message Sent",info:msg});
+						});
+					});
+
+				}
 			});
 		});
 	}catch(err){
@@ -58,11 +68,18 @@ module.exports.newMessage = function(req,res) {
 } 
 
 module.exports.AllMessages = function(req,res){
-	Message.find({userId:req.user._id},function(err,msgs){
+	Message.find({ $or:[ {'userId':req.user._id}, {'to':req.user.username}]},function(err,msgs){
 		if(err)
 			res.json({head:"get messages",error:"could not retrieve message",message:err.errmsg});
 		else
-			res.json({head:"get messages",error:"None",message:"messages retrieved",info:msgs});
+			{
+				for(var i = 0; i<msgs.length;i++){
+					msgs[i].state = "recieved";
+					if(msgs[i].userId === req.user._id)
+						msgs[i].state = "sent";
+				}
+				res.json({head:"get messages",error:"None",message:"messages retrieved",info:msgs});
+			}
 	});
 }
 
@@ -75,17 +92,6 @@ module.exports.displayMessage = function(req,res){
 		{
 			res.json({head:"get message",error:"None",message:"message found",info:msg});
 		}
-	});
-}
-
-module.exports.updateMessage = function(req,res){
-	var update = req.body;
-
-	Message.update({userId:req.user._id,_id:req.params.msg_id},update,{new:true},function(err,msg){
-		if(err)
-			res.json({head:"put message",error:"could not update message",message:err.errmsg});
-		else
-			res.json({head:"put message",error:"None",message:"message updated",info:msg});
 	});
 }
 
