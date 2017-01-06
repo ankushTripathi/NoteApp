@@ -7,6 +7,7 @@ var passport = require('passport');
 var Message = require('./models/message');
 var msgController = require('./controllers/message');
 var userController = require('./controllers/user');
+var clientController = require('./controllers/client');
 var Auth = require('./controllers/auth');
 
 var app = express();
@@ -29,19 +30,47 @@ router.get('/',function(req,res,next) {
 });
 
 //users route
-router.route('/users')
+router.
+route('/users')
 .post(userController.addUser)
 .get(Auth.authenticate,userController.AllUsers);
 
+router
+.use(Auth.authenticate)
+.route('/users/:username')
+.get(userController.getUser);
+
+router
+.use(Auth.authenticate)
+.route('/profile')
+.get(userController.displayUser)
+.put(userController.editUser);
+
+// router
+// .use(Auth.authenticate)
+// .route('/profile/:action')
+// .get(userController.getMessage)
+
+
+//client route
+router
+.use(Auth.authenticate)
+.route('/clients')
+.get(clientController.getClients)
+.post(clientController.addClient);
 
 //msgs route
-router.route('/msg')
-.post(Auth.authenticate,msgController.sendMessage)
-.get(Auth.authenticate,msgController.AllMessages);
+router
+.use(Auth.authenticate)
+.route('/msg')
+.post(msgController.sendMessage)
+.get(msgController.AllMessages);
 
-router.route('/msg/:msg_id')
-.get(Auth.authenticate,msgController.displayMessage)
-.delete(Auth.authenticate,msgController.deleteMessage);
+router
+.use(Auth.authenticate)
+.route('/msg/:msg_id')
+.get(msgController.displayMessage)
+.delete(msgController.deleteMessage);
 
 
 //start server on port 3000
