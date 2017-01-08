@@ -33,18 +33,16 @@ router.get('/',function(req,res,next) {
 router.
 route('/users')
 .post(userController.addUser)
-.get(Auth.authenticate,userController.AllUsers);
+.get(Auth.isUserAuthenticated,userController.AllUsers);
 
 router
-.use(Auth.authenticate)
 .route('/users/:username')
-.get(userController.getUser);
+.get(Auth.isUserAuthenticated,userController.getUser);
 
 router
-.use(Auth.authenticate)
 .route('/profile')
-.get(userController.displayUser)
-.put(userController.editUser);
+.get(Auth.isUserAuthenticated,userController.displayUser)
+.put(Auth.isUserAuthenticated,userController.editUser);
 
 // router
 // .use(Auth.authenticate)
@@ -54,23 +52,21 @@ router
 
 //client route
 router
-.use(Auth.authenticate)
-.route('/clients')
-.get(clientController.getClients)
-.post(clientController.addClient);
+.route('/client')
+.post(clientController.addClient)
+.get(Auth.isClientAuthenticated,clientController.getClient);
+
 
 //msgs route
 router
-.use(Auth.authenticate)
 .route('/msg')
-.post(msgController.sendMessage)
-.get(msgController.AllMessages);
+.post(Auth.isUserAuthenticated,msgController.sendMessage)
+.get(Auth.isUserAuthenticated,msgController.AllMessages);
 
 router
-.use(Auth.authenticate)
 .route('/msg/:msg_id')
-.get(msgController.displayMessage)
-.delete(msgController.deleteMessage);
+.get(Auth.isUserAuthenticated,msgController.displayMessage)
+.delete(Auth.isUserAuthenticated,msgController.deleteMessage);
 
 
 //start server on port 3000
