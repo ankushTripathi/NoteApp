@@ -3,14 +3,21 @@ var mongo = require('mongodb');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var passport = require('passport');
+var session = require('express-session');
+var ejs = require('ejs');
+var path = require('path');
 
 var Message = require('./models/message');
 var msgController = require('./controllers/message');
 var userController = require('./controllers/user');
 var clientController = require('./controllers/client');
 var Auth = require('./controllers/auth');
+var oauth2controller = require('./controllers/oauth2');
 
 var app = express();
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine','ejs');
 
 var db = mongoose.connection;
 mongoose.connect('mongodb://localhost:27017/NoteApp');
@@ -18,6 +25,14 @@ mongoose.connect('mongodb://localhost:27017/NoteApp');
 var router = express.Router();
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+	extended:true
+}));
+app.use(session({
+	secret : "helloWorld",
+	saveUninitialized : true,
+	resave : true
+}));
 app.use(passport.initialize());
 
 //use /api as main route.. for now
@@ -33,16 +48,16 @@ router.get('/',function(req,res,next) {
 router.
 route('/users')
 .post(userController.addUser)
-.get(Auth.isUserAuthenticated,userController.AllUsers);
+.get(Auth.isAuthenticated,userController.AllUsers);
 
 router
 .route('/users/:username')
-.get(Auth.isUserAuthenticated,userController.getUser);
+.get(Auth.isAuthenticated,userController.getUser);
 
 router
 .route('/profile')
-.get(Auth.isUserAuthenticated,userController.displayUser)
-.put(Auth.isUserAuthenticated,userController.editUser);
+.get(Auth.isAuthenticated,userController.displayUser)
+.put(Auth.isAuthenticated,userController.editUser);
 
 // router
 // .use(Auth.authenticate)
@@ -52,21 +67,30 @@ router
 
 //client route
 router
-.route('/client')
-.post(clientController.addClient)
-.get(Auth.isClientAuthenticated,clientController.getClient);
+.route('/clients')
+.post(Auth.isAuthenticated,clientController.addClient)
+.get(Auth.isAuthenticated,clientController.getClients);
 
+
+//OAUTH2 route
+router
+.route('/oauth2/authorize')
+.get(Auth.isAuthenticated,oauth2controller.authorization)
+.post(Auth.isAuthenticated,oauth2controller.decision);
+router
+.route('/oauth2/token')
+.post(Auth.isClientAuthenticated,oauth2controller.token);
 
 //msgs route
 router
 .route('/msg')
-.post(Auth.isUserAuthenticated,msgController.sendMessage)
-.get(Auth.isUserAuthenticated,msgController.AllMessages);
+.post(Auth.isAuthenticated,msgController.sendMessage)
+.get(Auth.isAuthenticated,msgController.AllMessages);
 
 router
 .route('/msg/:msg_id')
-.get(Auth.isUserAuthenticated,msgController.displayMessage)
-.delete(Auth.isUserAuthenticated,msgController.deleteMessage);
+.get(Auth.isAuthenticated,msgController.displayMessage)
+.delete(Auth.isAuthenticated,msgController.deleteMessage);
 
 
 //start server on port 3000

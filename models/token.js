@@ -19,17 +19,5 @@ var tokenSchema = new mongoose.Schema({
 	}
 });
 
-tokenSchema.pre('save',function(callback){
-	bcrypt.genSalt(10,function(err,salt){
-		if(err)
-			return callback(err);
-		bcrypt.hash(this.value,salt,null,function(err,hash){
-			if(err)
-				return callback(err);
-			this.value = hash;
-			callback();
-		});
-	});
-});
 
 module.exports = mongoose.model('Token',tokenSchema);
